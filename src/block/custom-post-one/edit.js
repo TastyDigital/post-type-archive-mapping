@@ -1431,6 +1431,12 @@ class PTAM_Custom_Posts extends Component {
 				isActive: postLayout === "list"
 			},
 			{
+				icon: "slides",
+				title: __("Slider View", "post-type-archive-mapping"),
+				onClick: () => setAttributes({ postLayout: "slides", displayPostContent: false }),
+				isActive: postLayout === "slides"
+			},
+			{
 				icon: "admin-page",
 				title: __("Full Content View", "post-type-archive-mapping"),
 				onClick: () => setAttributes({ postLayout: "full_content", displayPostContent: true }),
@@ -1495,6 +1501,7 @@ class PTAM_Custom_Posts extends Component {
 							"is-custom": imageLocation !== "regular",
 							"is-grid": postLayout === "grid",
 							"is-list": postLayout === "list",
+							"is-slides": postLayout === "slides",
 							[`columns-${columns}`]: postLayout === "grid",
 							"ptam-post-grid-items": "ptam-post-grid-items"
 						})}
@@ -1508,7 +1515,7 @@ class PTAM_Custom_Posts extends Component {
 										: "no-thumb"
 								)}
 								style={!removeStyles ? borderPaddingStyles : {}}
-							>
+							><div className="dynamic-grid-block-post">
 								{displayPostImage &&
 								post.featured_image_src !== undefined &&
 								post.featured_image_src &&
@@ -1562,14 +1569,6 @@ class PTAM_Custom_Posts extends Component {
 										</div>
 									) : null}
 
-									{displayCustomFields && (
-										<div
-											className="ptam-block-post-custom-fields"
-											style={!removeStyles ? customFieldsStyles : {}}
-										>
-											{htmlToReactParser.parse(customFields)}
-										</div>
-									)}
 
 									<div
 										className={`ptam-block-post-grid-byline ${capitilization}`}
@@ -1623,7 +1622,9 @@ class PTAM_Custom_Posts extends Component {
 													})}
 												</div>
 											)}
-										{displayPostImage &&
+										
+									</div>
+                                    {displayPostImage &&
 										post.featured_image_src !== undefined &&
 										post.featured_image_src &&
 										"below_title_and_meta" === this.state.imageLocation ? (
@@ -1636,8 +1637,6 @@ class PTAM_Custom_Posts extends Component {
 												</a>
 											</div>
 										) : null}
-									</div>
-
 									<div
 										className="ptam-block-post-grid-excerpt"
 										style={!removeStyles ? contentStyles : {}}
@@ -1652,7 +1651,14 @@ class PTAM_Custom_Posts extends Component {
 												{htmlToReactParser.parse(post.post_content)}
 											</Fragment>
 										}
-
+                                        {displayCustomFields && (
+										<div
+											className="ptam-block-post-custom-fields"
+											style={!removeStyles ? customFieldsStyles : {}}
+										>
+											{htmlToReactParser.parse(customFields)}
+										</div>
+									)}
 										{displayPostLink && (
 											<p>
 												<a
@@ -1666,19 +1672,6 @@ class PTAM_Custom_Posts extends Component {
 												</a>
 											</p>
 										)}
-										{displayPostImage &&
-										post.featured_image_src !== undefined &&
-										post.featured_image_src &&
-										"bottom" === this.state.imageLocation ? (
-											<div
-												className="ptam-block-post-grid-image"
-												style={!removeStyles ? imageAlignmentStyles : {}}
-											>
-												<a href={post.link} target="_blank" rel="bookmark">
-													{htmlToReactParser.parse(post.featured_image_src)}
-												</a>
-											</div>
-										) : null}
 									</div>
 									{userTaxonomiesArray.length > 0 &&
 										displayTaxonomies &&
@@ -1706,7 +1699,21 @@ class PTAM_Custom_Posts extends Component {
 											</div>
 										)}
 								</div>
-							</article>
+
+                                {displayPostImage &&
+                                post.featured_image_src !== undefined &&
+                                post.featured_image_src &&
+                                "bottom" === this.state.imageLocation ? (
+                                    <div
+                                        className="ptam-block-post-grid-image"
+                                        style={!removeStyles ? imageAlignmentStyles : {}}
+                                    >
+                                        <a href={post.link} target="_blank" rel="bookmark">
+                                            {htmlToReactParser.parse(post.featured_image_src)}
+                                        </a>
+                                    </div>
+                                ) : null}
+							</div></article>
 						))}
 					</div>
 				</div>

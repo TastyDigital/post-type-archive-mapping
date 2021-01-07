@@ -250,9 +250,9 @@ class Custom_Post_Types {
 				// Start the markup for the post.
 				$article_style      = sprintf( 'border: %dpx solid %s;  background: %s; padding: %dpx; border-radius: %dpx;', absint( $attributes['border'] ), esc_attr( $attributes['borderColor'] ), esc_attr( $attributes['backgroundColor'] ), absint( $attributes['padding'] ), absint( $attributes['borderRounded'] ) );
 				$list_items_markup .= sprintf(
-					'<article class="%1$s" style="%2$s">',
+					'<article class="%1$s"%2$s><div class="dynamic-grid-block-post">',
 					esc_attr( $post_thumb_class ),
-					( ! $attributes['removeStyles'] ) ? $article_style : ''
+					( ! $attributes['removeStyles'] ) ? ' style="'.$article_style.'"' : ''
 				);
 				if ( 'regular' === $image_placememt_options ) {
 					$list_items_markup .= $this->get_profile_image( $attributes, $post_thumb_id, $post->post_author, $post->ID );
@@ -394,7 +394,7 @@ class Custom_Post_Types {
 				}
 
 				$show_meta = false;
-				if ( $attributes['displayCustomFields'] || ( isset( $attributes['displayPostAuthor'] ) && $attributes['displayPostAuthor'] ) || ( isset( $attributes['displayTaxonomies'] ) && $attributes['displayTaxonomies'] ) || ( isset( $attributes['displayPostDate'] ) && $attributes['displayPostDate'] ) ) {
+				if ( ( isset( $attributes['displayPostAuthor'] ) && $attributes['displayPostAuthor'] ) || ( isset( $attributes['displayTaxonomies'] ) && $attributes['displayTaxonomies'] ) || ( isset( $attributes['displayPostDate'] ) && $attributes['displayPostDate'] ) ) {
 					$show_meta = true;
 				}
 
@@ -416,20 +416,7 @@ class Custom_Post_Types {
 
 				// Get the featured image.
 				if ( isset( $attributes['displayPostImage'] ) && $attributes['displayPostImage'] && $post_thumb_id && 'below_title' === $attributes['imageLocation'] ) {
-					if ( ! $attributes['removeStyles'] ) {
-						$list_items_markup .= sprintf(
-							'<div class="ptam-block-post-grid-image" %3$s><a href="%1$s" rel="bookmark">%2$s</a></div>',
-							esc_url( get_permalink( $post_id ) ),
-							$this->get_profile_image( $attributes, $post_thumb_id, $post->post_author, $post->ID ),
-							'grid' === $attributes['postLayout'] ? "style='text-align: {$attributes['imageAlignment']}" : ''
-						);
-					} else {
-						$list_items_markup .= sprintf(
-							'<div class="ptam-block-post-grid-image"><a href="%1$s" rel="bookmark">%2$s</a></div>',
-							esc_url( get_permalink( $post_id ) ),
-							$this->get_profile_image( $attributes, $post_thumb_id, $post->post_author, $post->ID )
-						);
-					}
+					$list_items_markup .= $this->get_profile_image( $attributes, $post_thumb_id, $post->post_author, $post->ID );
 				}
 
 				// Get the post author.
@@ -464,11 +451,7 @@ class Custom_Post_Types {
 				}
 				// Get the featured image.
 				if ( isset( $attributes['displayPostImage'] ) && $attributes['displayPostImage'] && $post_thumb_id && 'below_title_and_meta' === $attributes['imageLocation'] ) {
-					$list_items_markup .= sprintf(
-						'<div class="ptam-block-post-grid-image"><a href="%1$s" rel="bookmark">%2$s</a></div>',
-						esc_url( get_permalink( $post_id ) ),
-						$this->get_profile_image( $attributes, $post_thumb_id, $post->post_author, $post->ID )
-					);
+					$list_items_markup .= $this->get_profile_image( $attributes, $post_thumb_id, $post->post_author, $post->ID);
 				}
 
 				// Close the byline content.
@@ -478,15 +461,7 @@ class Custom_Post_Types {
 					);
 				}
 
-				// Wrap the excerpt content.
-				if ( ! $attributes['removeStyles'] ) {
-					$list_items_markup .= sprintf(
-						'<p class="ptam-block-post-grid-excerpt" %s>',
-						'grid' === $attributes['postLayout'] ? "style='text-align: {$attributes['contentAlignment']}; color: {$attributes['contentColor']}; font-family: {$attributes['contentFont']}'" : "style='color: {$attributes['contentColor']}; font-family: {$attributes['contentFont']}'"
-					);
-				} else {
-					$list_items_markup .= '<p class="ptam-block-post-grid-excerpt">';
-				}
+
 
 				if ( isset( $attributes['postLayout'] ) && 'full_content' === $attributes['postLayout'] ) {
 					$list_items_markup .= apply_filters( 'the_content', $post->post_content );
@@ -505,7 +480,21 @@ class Custom_Post_Types {
 					}
 
 					if ( isset( $attributes['displayPostExcerpt'] ) && $attributes['displayPostExcerpt'] ) {
-						$list_items_markup .= wp_kses_post( $excerpt );
+                        // Wrap the excerpt content.
+                        if ( ! $attributes['removeStyles'] ) {
+                            $list_items_markup .= sprintf(
+                                '<p class="ptam-block-post-grid-excerpt" %s>',
+                                'grid' === $attributes['postLayout'] ? "style='text-align: {$attributes['contentAlignment']}; color: {$attributes['contentColor']}; font-family: {$attributes['contentFont']}'" : "style='color: {$attributes['contentColor']}; font-family: {$attributes['contentFont']}'"
+                            );
+                        } else {
+                            $list_items_markup .= '<p class="ptam-block-post-grid-excerpt">';
+                        }
+                        $list_items_markup .= wp_kses_post( $excerpt );
+                        
+                        // Close the excerpt content.
+                        $list_items_markup .= sprintf(
+                            '</p>'
+                        );
 					}
 				}
 				if ( $post_type_object->publicly_queryable ) {
@@ -528,25 +517,7 @@ class Custom_Post_Types {
 					}
 				}
 
-				// Get the featured image.
-				if ( isset( $attributes['displayPostImage'] ) && $attributes['displayPostImage'] && $post_thumb_id && 'bottom' === $attributes['imageLocation'] ) {
-					if ( 'landscape' === $attributes['imageCrop'] ) {
-						$post_thumb_size = 'ptam-block-post-grid-landscape';
-					} else {
-						$post_thumb_size = 'ptam-block-post-grid-square';
-					}
 
-					$list_items_markup .= sprintf(
-						'<div class="ptam-block-post-grid-image"><a href="%1$s" rel="bookmark">%2$s</a></div>',
-						esc_url( get_permalink( $post_id ) ),
-						$this->get_profile_image( $attributes, $post_thumb_id, $post->post_author, $post->ID )
-					);
-				}
-
-				// Close the excerpt content.
-				$list_items_markup .= sprintf(
-					'</p>'
-				);
 
 				// Get the taxonomies.
 				if ( isset( $attributes['displayTaxonomies'] ) && $attributes['displayTaxonomies'] && 'below_content' === $taxonomy_placement_options ) {
@@ -563,8 +534,13 @@ class Custom_Post_Types {
 				// Wrap the text content.
 				$list_items_markup .= '</div>'; // ptam-block-post-grid-text.
 
+				// Get the featured image.
+				if ( isset( $attributes['displayPostImage'] ) && $attributes['displayPostImage'] && $post_thumb_id && 'bottom' === $attributes['imageLocation'] ) {
+					$list_items_markup .= $this->get_profile_image( $attributes, $post_thumb_id, $post->post_author, $post->ID );
+                }
+                
 				// Close the markup for the post.
-				$list_items_markup .= "</article>\n";
+				$list_items_markup .= "</div></article>\n";
 			}
 		endif;
 
@@ -581,6 +557,8 @@ class Custom_Post_Types {
 			$grid_class .= ' is-list';
 		} elseif ( isset( $attributes['postLayout'] ) && 'grid' === $attributes['postLayout'] ) {
 			$grid_class .= ' is-grid';
+		} elseif ( isset( $attributes['postLayout'] ) && 'slides' === $attributes['postLayout'] ) {
+			$grid_class .= ' is-slides';
 		} else {
 			$grid_class .= ' full-content';
 		}
@@ -591,8 +569,9 @@ class Custom_Post_Types {
 
 		// Pagination.
 		$pagination = '';
-		if ( isset( $attributes['pagination'] ) && $attributes['pagination'] ) {
-			$pagination = paginate_links(
+		if ( (isset( $attributes['pagination'] ) && $attributes['pagination']) && ( isset( $attributes['postLayout'] ) && $attributes['postLayout'] !== 'slides' )) {
+            $pagination = sprintf('<div class="ptam-pagination">%s</div>',
+            paginate_links(
 				array(
 					'total'        => $recent_posts->max_num_pages,
 					'current'      => max( 1, get_query_var( 'paged' ) ),
@@ -607,12 +586,12 @@ class Custom_Post_Types {
 					'add_args'     => false,
 					'add_fragment' => '',
 				)
-			);
+			));
 		}
 
 		// Output the post markup.
 		$block_content = sprintf(
-			'<div class="%1$s"><div class="%2$s">%3$s</div><div class="ptam-pagination">%4$s</div></div>',
+			'<div class="%1$s"><div class="%2$s">%3$s</div>%4$s</div>',
 			esc_attr( $class ),
 			esc_attr( $grid_class ),
 			$list_items_markup,
